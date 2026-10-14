@@ -1,0 +1,2 @@
+Timestamp (UTC),Status Code,Uptime,SHA256 Hash,Hash Unchanged?,Notes
+2026-10-14T19:28:22.493778+00:00,,DOWN,N/A,N/A,"HTTPSConnectionPool(host='tssi.ro', port=443): Max retries exceeded with url: /uploads/Proiect-de-divizare-TSSI.pdf (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1017)')))"
