@@ -3,20 +3,23 @@ import hashlib
 import csv
 import os
 import requests
+import urllib3
 
-FILE_URL = "https://tssi.ro/uploads/Proiect-de-divizare-TSSI.pdf"  # <-- Paste your link inside the quotes
+# Suppress the insecure request warning to keep logs clean
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+FILE_URL = "https://tssi.ro/uploads/Proiect-de-divizare-TSSI.pdf"
 LOG_FILE = "30_day_monitoring_report.csv"
 
 def get_file_hash(content):
     return hashlib.sha256(content).hexdigest()
 
 def get_expected_hash():
-    # Reads the CSV to find the very first hash we recorded
     if not os.path.exists(LOG_FILE):
         return None
     with open(LOG_FILE, mode="r", encoding="utf-8") as f:
         reader = csv.reader(f)
-        next(reader, None) # skip header
+        next(reader, None)
         for row in reader:
             if len(row) >= 4 and row[3] not in ("N/A", "Error"):
                 return row[3]
@@ -33,14 +36,15 @@ def check_file():
     expected_hash = get_expected_hash()
 
     try:
-        response = requests.get(FILE_URL, timeout=15)
+        # Added verify=False to bypass the SSL certificate error
+        response = requests.get(FILE_URL, timeout=15, verify=False)
         status_code = response.status_code
         if response.status_code == 200:
             uptime = "UP"
             file_hash = get_file_hash(response.content)
             
             if expected_hash is None:
-                hash_matched = "BASELINE SET" # First run
+                hash_matched = "BASELINE SET"
             else:
                 hash_matched = "YES" if file_hash == expected_hash else "CHANGED"
         else:
@@ -48,7 +52,6 @@ def check_file():
     except Exception as e:
         error_msg = str(e)
 
-    # Save to CSV
     file_exists = os.path.exists(LOG_FILE)
     with open(LOG_FILE, mode="a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
